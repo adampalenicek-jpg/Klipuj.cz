@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KlipBox — Propagujte @xetor.sk a vydělávejte 5 Kč za 1 000 zhlédnutí</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        coral: {
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                        },
+                        surface: {
+                            50: '#fafafa',
+                            100: '#f5f5f5',
+                            200: '#e5e5e5',
+                            300: '#d4d4d4',
+                        }
+                    },
+                    fontFamily: {
+                        heading: ['Space Grotesk', 'sans-serif'],
+                        body: ['DM Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'DM Sans', sans-serif; }
+        .font-heading { font-family: 'Space Grotesk', sans-serif; }
+        /* Accent theming (editable in admin panel) */
+        :root {
+            --accent: #2563eb;
+            --accent-dark: #1d4ed8;
+        }
+        .accent-bg { background-color: var(--accent) !important; }
+        .accent-bg:hover { background-color: var(--accent-dark) !important; }
+        .accent-text { color: var(--accent) !important; }
+        .nav-link:hover { color: var(--accent) !important; }
+        .accent-grad { background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%) !important; }
+        .gradient-mesh {
+            background: 
+                radial-gradient(at 20% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(at 80% 20%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        .card-lift {
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .card-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(59, 130, 246, 0.12), 0 4px 12px rgba(0,0,0,0.06);
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.6s ease-out forwards; }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .slide-in-right { animation: slideInRight 0.7s ease-out forwards; }
+        .stagger-children > * {
+            opacity: 0;
+            animation: fadeUp 0.5s ease-out forwards;
+        }
+        .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+        .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+        .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        }
+        /* Instagram signature gradient (blue theme) */
+        .gradient-ig {
+            background-image: linear-gradient(45deg, #60a5fa 0%, #3b82f6 25%, #2563eb 50%, #1d4ed8 75%, #1e3a8a 100%);
+        }
+        .gradient-ig-text {
+            background-image: linear-gradient(90deg, #3b82f6 0%, #2563eb 50%, #1e40af 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        /* Story-style ring around profile picture */
+        .ig-ring {
+            background: conic-gradient(from 210deg, #93c5fd, #60a5fa, #3b82f6, #2563eb, #1d4ed8, #93c5fd);
+            border-radius: 9999px;
+            padding: 4px;
+        }
+        /* Modal styles */
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            animation: fadeUp 0.3s ease-out;
+        }
+        .input-focus {
+            transition: all 0.2s ease;
+        }
+        .input-focus:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+    .nav-hidden { transform: translateY(-100%); opacity: 0; }
+        .nav-visible { transform: translateY(0); opacity: 1; }
+        /* Admin panel */
+        .admin-tab {
+            transition: all 0.15s ease;
+        }
+        .admin-tab.active {
+            background: #eef2ff;
+            color: #4338ca;
+            font-weight: 600;
+        }
+        .admin-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.15s ease;
+        }
+        .admin-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+        .admin-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.35rem;
+        }
+        .admin-list-row {
+            border: 1px dashed #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            background: #fafafa;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-800 antialiased">
+
+    <!-- Sign Up Modal -->
+    <div id="signup-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModals()"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-sm p-5 relative">
+                <button onclick="closeModals()" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all duration-200 z-10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-10 h-10 accent-grad rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-heading text-lg font-bold text-gray-900 leading-tight">Zapojit se do propagace</h3>
+                        <p class="text-gray-500 text-sm mt-0.5">Vydělávejte propagací @xetor.sk</p>
+                    </div>
+                </div>
+                
+                <form id="signup-form" onsubmit="handleSignup(event)">
+                    <div class="space-y-2.5">
+                        <div>
+                            <label for="signup-name" class="block text-sm font-medium text-gray-700 mb-1.5">Jméno a příjmení</label>
+                            <input type="text" id="signup-name" required class="input-focus w-full px-4 py-2 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400" placeholder="Jan Novák">
+                        </div>
+                        <div>
+                            <label for="signup-email" class="block text-sm font-medium text-gray-700 mb-1.5">E-mail</label>
+                            <input type="email" id="signup-email" required class="input-focus w-full px-4 py-2 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400" placeholder="jan@example.cz">
+                        </div>
+                        <div>
+                            <label for="signup-password" class="block text-sm font-medium text-gray-700 mb-1.5">Heslo</label>
+                            <input type="password" id="signup-password" required minlength="6" class="input-focus w-full px-4 py-2 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400" placeholder="Minimálně 6 znaků">
+                        </div>
+                        <div>
+                            <label for="signup-platform" class="block text-sm font-medium text-gray-700 mb-1.5">Hlavní platforma</label>
+                            <select id="signup-platform" class="input-focus w-full px-4 py-2 border border-gray-200 rounded-xl text-gray-900 bg-white">
+                                <option value="tiktok">TikTok</option>
+                                <option value="instagram">Instagram Reels</option>
+                                <option value="youtube">YouTube Shorts</option>
+                                <option value="multiple">Více platforem</option>
+                            </select>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <input type="checkbox" id="signup-terms" required class="mt-1 w-4 h-4 accent-text border-gray-300 rounded focus:ring-brand-500">
+                            <label for="signup-terms" class="text-sm text-gray-500">
+                                Souhlasím s <a href="#" class="accent-text hover:underline">podmínkami služby</a> a <a href="#" class="accent-text hover:underline">zásadami ochrany soukromí</a>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full accent-bg text-white font-bold py-2.5 rounded-xl mt-4 transition shadow-lg shadow-brand-500/25">
+                        Zapojit se a vydělávat
+                    </button>
+                    
+                    <div class="mt-3.5 text-center text-sm text-gray-500">
+                        Už máte účet? 
+                        <button type="button" onclick="switchToLogin()" class="accent-text font-semibold hover:underline">Přihlásit se</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModals()"></div>
+        <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content bg-white rounded-3xl shadow-2xl w-full max-w-sm p-5 relative">
+                <button onclick="closeModals()" class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition-all duration-200 z-10">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+                
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-10 h-10 accent-grad rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-brand-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-heading text-lg font-bold text-gray-900 leading-tight">Přihlásit se</h3>
+                        <p class="text-gray-500 text-sm mt-0.5">Vítejte zpět v KlipBox</p>
+                    </div>
+                </div>
+                
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="space-y-2.5">
+                        <div>
+                            <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1.5">E-mail</label>
+                            <input type="email" id="login-email" required class="input-focus w-full px-4 py-2 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400" placeholder="jan@example.cz">
+                        </div>
+                        <div>
+                            <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1.5">Heslo</label>
+                            <input type="password" id="login-password" required class="input-focus w-full px-4 py-2 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400" placeholder="Vaše heslo">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" class="w-4 h-4 accent-text border-gray-300 rounded focus:ring-brand-500">
+                                <span class="text-sm text-gray-500">Zapamatovat si mě</span>
+                            </label>
+                            <a href="#" class="text-sm accent-text hover:underline">Zapomenuté heslo?</a>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full accent-bg text-white font-bold py-2.5 rounded-xl mt-4 transition shadow-lg shadow-brand-500/25">
+                        Přihlásit se
+                    </button>
+                    
+                    <div class="mt-3.5 text-center text-sm text-gray-500">
+                        Nemáte účet? 
+                        <button type="button" onclick="switchToSignup()" class="accent-text font-semibold hover:underline">Zaregistrujte se</button>
+                    </div>
+                </form>
+                
+                <!-- Social Login -->
+                <div class="mt-4">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-200"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-white text-gray-400">nebo</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 grid grid-cols-2 gap-3">
+                        <button class="flex items-center justify-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Google</span>
+                        </button>
+                        <button class="flex items-center justify-center gap-2 px-3 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition">
+                            <svg class="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                            <span class="text-sm font-medium text-gray-700">Facebook</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="fixed top-20 right-4 z-50 hidden">
+        <div class="bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span id="toast-message">Úspěch!</span>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 accent-grad rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span data-field="brand.name" class="font-heading text-xl font-bold text-gray-900">KlipBox</span>
+                </a>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#fungovani" class="nav-link text-sm text-gray-500 hover:accent-text transition font-medium">Jak vydělávat</a>
+                    <a href="#instagram" class="nav-link text-sm text-gray-500 hover:accent-text transition font-medium">@xetor.sk</a>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="openModal('login')" class="text-sm font-semibold text-gray-600 hover:accent-text transition px-4 py-2">
+                        Přihlásit se
+                    </button>
+                    <button onclick="openModal('signup')" class="accent-bg text-white font-semibold px-5 py-2.5 rounded-full text-sm transition shadow-lg shadow-brand-500/25">
+                        Zapojit se
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-mesh pt-32 pb-24 sm:pt-40 sm:pb-32 relative overflow-hidden">
+        <div class="blob w-96 h-96 bg-brand-400 top-10 -left-20 opacity-20"></div>
+        <div class="blob w-80 h-80 bg-coral-400 bottom-10 right-0 opacity-15"></div>
+        
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 relative">
+            <div class="max-w-3xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-1.5 mb-8 shadow-sm slide-in-right">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span data-field="hero.badge" class="text-xs font-medium text-gray-600">Nový! Propagujte @xetor.sk a vydělávejte — 5 Kč / 1 000 zhlédnutí</span>
+                </div>
+                
+                <h1 class="font-heading text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6 slide-in-right">
+                    <span data-field="hero.title1">Propagujte</span>
+                    <span data-field="hero.title2" class="accent-text">Vydělávejte peníze.</span>
+                </h1>
+                
+                <p data-field="hero.subtitle" class="text-lg sm:text-xl text-gray-500 mb-10 max-w-xl mx-auto leading-relaxed slide-in-right">
+                    Sdílejte příspěvky @xetor.sk na svém TikToku, Instagramu nebo YouTubu a získejte 5 Kč za každých 1 000 zhlédnutí. Stačí sledovat účet a sdílet obsah.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center slide-in-right">
+                    <button onclick="openModal('signup')" class="accent-bg text-white font-bold px-8 py-4 rounded-full text-lg transition shadow-xl shadow-brand-500/25 hover:shadow-2xl hover:shadow-brand-500/30 hover:-translate-y-0.5">
+                        <span data-field="hero.cta1">Zapojit se a vydělávat →</span>
+                    </button>
+                    <a href="#instagram" class="bg-white border-2 border-gray-200 hover:border-brand-300 text-gray-700 font-semibold px-8 py-4 rounded-full text-lg transition hover:shadow-lg text-center">
+                        <span data-field="hero.cta2">Sledovat na Instagramu</span>
+                    </a>
+                </div>
+                
+                <div class="flex flex-wrap items-center justify-center gap-6 mt-12 text-sm text-gray-400">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span data-field="hero.perks.0">Vstup zdarma</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span data-field="hero.perks.1">5 Kč / 1 000 zhlédnutí</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span data-field="hero.perks.2">Týdenní výplaty</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="fungovani" data-section="howItWorks" class="py-20 sm:py-28 bg-white">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="text-center mb-16">
+                <span data-field="howItWorks.eyebrow" class="inline-block accent-text font-semibold text-sm uppercase tracking-wider mb-3">Jak na to</span>
+                <h2 data-field="howItWorks.heading" class="font-heading text-3xl sm:text-4xl font-bold text-gray-900">Jak propagovat a vydělávat</h2>
+                <p data-field="howItWorks.sub" class="text-gray-500 mt-3 max-w-lg mx-auto">Tři jednoduché kroky k prvním výdělkům</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8 stagger-children">
+                <div class="bg-gradient-to-br from-brand-50 to-brand-100/50 rounded-3xl p-8 border border-brand-100">
+                    <div class="w-16 h-16 accent-bg rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-brand-500/20">
+                        <span class="font-heading text-2xl font-bold text-white">1</span>
+                    </div>
+                    <h3 data-field="howItWorks.steps.0.title" class="font-heading text-xl font-bold text-gray-900 mb-3">Sledujte @xetor.sk</h3>
+                    <p data-field="howItWorks.steps.0.text" class="text-gray-500 leading-relaxed">Nejdřív účet sledujte na Instagramu — to je základ celé propagace a vašeho výdělku.</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-coral-50 to-orange-50/50 rounded-3xl p-8 border border-coral-100/50">
+                    <div class="w-16 h-16 bg-coral-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-coral-500/20">
+                        <span class="font-heading text-2xl font-bold text-white">2</span>
+                    </div>
+                    <h3 data-field="howItWorks.steps.1.title" class="font-heading text-xl font-bold text-gray-900 mb-3">Sdílejte obsah</h3>
+                    <p data-field="howItWorks.steps.1.text" class="text-gray-500 leading-relaxed">Stáhněte si příspěvky @xetor.sk a publikujte je na svém TikToku, Instagram Reels nebo YouTube Shorts.</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-emerald-50 to-green-50/50 rounded-3xl p-8 border border-emerald-100/50">
+                    <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20">
+                        <span class="font-heading text-2xl font-bold text-white">3</span>
+                    </div>
+                    <h3 data-field="howItWorks.steps.2.title" class="font-heading text-xl font-bold text-gray-900 mb-3">Získejte zaplaceno</h3>
+                    <p data-field="howItWorks.steps.2.text" class="text-gray-500 leading-relaxed">Za každých 1 000 zhlédnutí získáte 5 Kč. Výplaty posíláme týdně na účet nebo přes PayPal.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Section -->
+    <section id="instagram" data-section="instagram" class="py-20 sm:py-28 bg-surface-50">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12">
+                <div>
+                    <span data-field="instagram.eyebrow" class="inline-block accent-text font-semibold text-sm uppercase tracking-wider mb-3">Instagram</span>
+                    <h2 class="font-heading text-3xl sm:text-4xl font-bold text-gray-900"><span data-field="instagram.heading" class="gradient-ig-text">Sledujte @xetor.sk</span></h2>
+                </div>
+                <div class="flex items-center gap-2 mt-4 sm:mt-0 bg-white px-4 py-2 rounded-full border border-gray-100 shadow-sm">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span data-field="instagram.followersBadge" class="text-sm font-medium text-gray-600">745+ sledujících</span>
+                </div>
+            </div>
+
+            <!-- Promo banner -->
+            <div class="mb-10 overflow-hidden rounded-3xl accent-grad relative card-lift">
+                <div class="absolute inset-0 opacity-10">
+                    <div class="absolute -top-10 -right-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+                    <div class="absolute -bottom-16 -left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+                </div>
+                <div class="relative p-6 sm:p-8 grid lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <div class="inline-flex items-center gap-2 bg-white/15 text-white text-xs font-semibold uppercase tracking-wider rounded-full px-4 py-1.5 mb-4 backdrop-blur">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span data-field="instagram.promo.eyebrow">Vydělávejte s námi</span>
+                        </div>
+                        <h3 data-field="instagram.promo.title" class="font-heading text-2xl sm:text-3xl font-bold text-white leading-snug mb-4">
+                            Propagujte tento účet na TikToku, YouTube a Instagramu a vydělávejte peníze
+                        </h3>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <span data-field="instagram.promo.rewardLabel" class="text-white/90 font-semibold text-sm uppercase tracking-wider">Odměna</span>
+                            <span data-field="instagram.promo.reward" class="bg-white text-brand-700 font-heading font-bold text-lg px-5 py-2 rounded-full shadow-lg shadow-brand-900/20">5 Kč / 1 000 zhlédnutí</span>
+                        </div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-6">
+                        <h4 class="font-heading font-bold text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span data-field="instagram.promo.requirementsTitle">Požadavky</span>
+                        </h4>
+                        <ul class="space-y-3 text-white/90 text-sm">
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-white mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span data-field="instagram.promo.requirements.0">Sledujte účet @xetor.sk</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-white mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span data-field="instagram.promo.requirements.1">Veřejný účet na TikToku, YouTube nebo Instagramu</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-white mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span data-field="instagram.promo.requirements.2">Sdílejte příspěvky na svém profilu</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <svg class="w-4 h-4 text-white mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span data-field="instagram.promo.requirements.3">Bez umělého navyšování zhlédnutí (botů)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-5 gap-8 items-center">
+                <!-- Profile card -->
+                <div class="lg:col-span-2 bg-white rounded-3xl border border-gray-100 overflow-hidden card-lift shadow-lg shadow-gray-100/50">
+                    <div class="h-2 gradient-ig"></div>
+                    <div class="p-8 text-center">
+                        <div class="ig-ring w-28 h-28 mx-auto mb-5">
+                            <img src="profile.jpg" data-field="instagram.profilePic" data-attr="src" alt="Profilová fotka xetor.sk" class="w-full h-full rounded-full object-cover border-4 border-white shadow-xl">
+                        </div>
+                        <h3 data-field="instagram.name" class="font-heading text-2xl font-bold text-gray-900">xetor.sk</h3>
+                        <p data-field="instagram.handle" class="text-gray-400 text-sm mt-1 mb-5">@xetor.sk · Instagram</p>
+                        <div class="flex items-center justify-center gap-8 mb-6">
+                            <div class="text-center">
+                                <div data-field="instagram.followers" class="font-heading text-2xl font-bold gradient-ig-text">745+</div>
+                                <div data-field="instagram.followersLabel" class="text-xs text-gray-400 mt-0.5">Sledujících</div>
+                            </div>
+                            <div class="w-px h-10 bg-gray-100"></div>
+                            <div class="text-center">
+                                <div data-field="instagram.following" class="font-heading text-2xl font-bold text-gray-900">64</div>
+                                <div data-field="instagram.followingLabel" class="text-xs text-gray-400 mt-0.5">Sledovaných</div>
+                            </div>
+                        </div>
+                        <a href="https://www.instagram.com/xetor.sk/" target="_blank" rel="noopener noreferrer" data-field="instagram.followUrl" data-attr="href" class="gradient-ig text-white font-bold px-8 py-3.5 rounded-full transition shadow-lg shadow-brand-500/25 hover:opacity-90 hover:-translate-y-0.5 inline-flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                            <span data-field="instagram.followBtn">Sledovat</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Professional text -->
+                <div class="lg:col-span-3">
+                    <p data-field="instagram.text1" class="text-gray-600 leading-relaxed text-lg mb-6">
+                        Jmenuji se xetor.sk a na Instagramu sdílím svůj život přesně takový, jaký je — autenticky, bez zbytečné pózy a s nadhledem. Můj profil je místem, kde se potkává každodenní realita s lehkou zábavou, a právě to dělá z každého příspěvku něco, na co se vyplatí počkat.
+                    </p>
+                    <p data-field="instagram.text2" class="text-gray-500 leading-relaxed mb-8">
+                        Sledování mě nic nestojí — stačí jedno kliknutí a budete u všeho, co mě baví. Aktivně reaguji na zprávy i komentáře, takže nejste jen divák, ale součást komunity, která roste každým dnem. Dej follow bro!
+                    </p>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="flex items-start gap-3 bg-white rounded-2xl border border-gray-100 p-4 card-lift">
+                            <div class="w-10 h-10 gradient-ig rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-brand-500/20">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div data-field="instagram.benefits.0.title" class="font-heading font-bold text-gray-900 text-sm">Autenticita</div>
+                                <p data-field="instagram.benefits.0.text" class="text-xs text-gray-400 mt-1">Obsah, který je skutečný — ne uměle vykonstruovaný.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white rounded-2xl border border-gray-100 p-4 card-lift">
+                            <div class="w-10 h-10 gradient-ig rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-brand-500/20">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div data-field="instagram.benefits.1.title" class="font-heading font-bold text-gray-900 text-sm">Pravidelnost</div>
+                                <p data-field="instagram.benefits.1.text" class="text-xs text-gray-400 mt-1">Nový obsah, na který se můžete těšit.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white rounded-2xl border border-gray-100 p-4 card-lift">
+                            <div class="w-10 h-10 gradient-ig rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-brand-500/20">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div data-field="instagram.benefits.2.title" class="font-heading font-bold text-gray-900 text-sm">Komunita</div>
+                                <p data-field="instagram.benefits.2.text" class="text-xs text-gray-400 mt-1">Odpovídám na zprávy a komentáře.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 bg-white rounded-2xl border border-gray-100 p-4 card-lift">
+                            <div class="w-10 h-10 gradient-ig rounded-xl flex items-center justify-center flex-shrink-0 shadow-md shadow-brand-500/20">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div data-field="instagram.benefits.3.title" class="font-heading font-bold text-gray-900 text-sm">Zábava</div>
+                                <p data-field="instagram.benefits.3.text" class="text-xs text-gray-400 mt-1">Momentky, u kterých se zastavíte.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center sm:text-left">
+                        <a href="https://www.instagram.com/xetor.sk/" target="_blank" rel="noopener noreferrer" data-field="instagram.followUrl" data-attr="href" class="inline-flex items-center gap-2 gradient-ig text-white font-bold px-8 py-4 rounded-full text-lg transition shadow-xl shadow-brand-500/30 hover:shadow-2xl hover:-translate-y-0.5">
+                            <span data-field="instagram.cta">Sledovat @xetor.sk →</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section data-section="features" class="py-20 sm:py-28 bg-surface-50">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="text-center mb-12">
+                <span data-field="features.eyebrow" class="inline-block accent-text font-semibold text-sm uppercase tracking-wider mb-3">Proč propagovat</span>
+                <h2 data-field="features.heading" class="font-heading text-3xl sm:text-4xl font-bold text-gray-900">Proč propagovat @xetor.sk</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6 stagger-children">
+                <div class="feature-card rounded-3xl p-8 border border-gray-100 shadow-md card-lift">
+                    <div class="w-16 h-16 accent-bg rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-brand-500/20">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 data-field="features.items.0.title" class="font-heading text-xl font-bold text-gray-900 mb-3">Týdenní výplaty</h3>
+                    <p data-field="features.items.0.text" class="text-gray-500 leading-relaxed">Žádné čekání. Výdělky posíláme každý týden převodem na účet nebo přes PayPal, bez minimálního limitu.</p>
+                </div>
+                
+                <div class="feature-card rounded-3xl p-8 border border-gray-100 shadow-md card-lift">
+                    <div class="w-16 h-16 bg-coral-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-coral-500/20">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 data-field="features.items.1.title" class="font-heading text-xl font-bold text-gray-900 mb-3">5 Kč za 1 000 zhlédnutí</h3>
+                    <p data-field="features.items.1.text" class="text-gray-500 leading-relaxed">Žádné skryté poplatky. Předem vidíte, kolik za každých 1 000 zhlédnutí dostanete.</p>
+                </div>
+                
+                <div class="feature-card rounded-3xl p-8 border border-gray-100 shadow-md card-lift">
+                    <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/20">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 6l-4.5 4.5L12 7m8 5v5a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5"></path>
+                        </svg>
+                    </div>
+                    <h3 data-field="features.items.2.title" class="font-heading text-xl font-bold text-gray-900 mb-3">Bez sledujících</h3>
+                    <p data-field="features.items.2.text" class="text-gray-500 leading-relaxed">Nepotřebujete vlastní publikum ani tisíce followerů. Stačí sdílet obsah @xetor.sk.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Closing CTA -->
+    <section data-section="cta" class="py-20 sm:py-28 accent-grad relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+        </div>
+        
+        <div class="max-w-4xl mx-auto text-center px-5 sm:px-8 relative">
+            <h2 data-field="cta.title" class="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                Propagujte @xetor.sk a vydělávejte.
+            </h2>
+            <p data-field="cta.text" class="text-xl text-brand-100 mb-10 max-w-2xl mx-auto">
+                Sledujte účet, sdílejte příspěvky na svém TikToku, Instagramu nebo YouTubu a získejte 5 Kč za každých 1 000 zhlédnutí. Nepotřebujete sledující.
+            </p>
+            
+            <button onclick="openModal('signup')" class="bg-white accent-text font-bold px-10 py-5 rounded-full text-lg transition shadow-2xl hover:shadow-3xl hover:-translate-y-1 hover:bg-brand-50">
+                <span data-field="cta.button">Zapojit se zdarma →</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer data-section="footer" class="bg-gray-900 text-gray-400 py-16">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8">
+            <div class="grid md:grid-cols-4 gap-10 mb-12">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <div class="w-9 h-9 accent-grad rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <span data-field="brand.name" class="font-heading text-xl font-bold text-white">KlipBox</span>
+                    </div>
+                    <p data-field="footer.description" class="text-gray-500 max-w-sm leading-relaxed">Sledujte @xetor.sk na Instagramu a vydělávejte propagací jeho obsahu — 5 Kč za každých 1 000 zhlédnutí.</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-heading font-bold text-white mb-4">Právní informace</h4>
+                    <ul class="space-y-2.5">
+                        <li><a href="#" data-field="footer.legalLinks.0.href" data-attr="href" class="hover:text-white transition"><span data-field="footer.legalLinks.0.label">Podmínky služby</span></a></li>
+                        <li><a href="#" data-field="footer.legalLinks.1.href" data-attr="href" class="hover:text-white transition"><span data-field="footer.legalLinks.1.label">Zásady ochrany soukromí</span></a></li>
+                        <li><a href="#" data-field="footer.legalLinks.2.href" data-attr="href" class="hover:text-white transition"><span data-field="footer.legalLinks.2.label">Zásady cookies</span></a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-heading font-bold text-white mb-4">Sledujte nás</h4>
+                    <ul class="space-y-2.5">
+                        <li>
+                            <a href="https://www.instagram.com/xetor.sk/" target="_blank" rel="noopener noreferrer" data-field="instagram.followUrl" data-attr="href" class="hover:text-white transition flex items-center gap-2.5">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                </svg>
+                                <span data-field="footer.instagramLabel">Instagram — @xetor.sk</span>
+                            </a>
+                        </li>
+                        <li><a href="mailto:ahoj@klipbox.cz" data-field="footer.email" data-attr="mailto" class="hover:text-white transition">ahoj@klipbox.cz</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p data-field="footer.copyright" class="text-sm text-gray-500">© 2026 KlipBox. Všechna práva vyhrazena.</p>
+                <a href="https://www.instagram.com/xetor.sk/" target="_blank" rel="noopener noreferrer" data-field="instagram.followUrl" data-attr="href" class="text-sm text-gray-400 hover:text-white transition flex items-center gap-2">
+                    <span data-field="footer.bottomText">Propagujte @xetor.sk — 5 Kč / 1 000 zhlédnutí</span>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== ADMIN PANEL (hidden, opens with Ctrl+Shift+A) ===== -->
+    <div id="admin-overlay" class="fixed inset-0 z-[100] hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeAdmin()"></div>
+        <div class="relative z-10 max-w-6xl mx-auto my-8 h-[calc(100vh-4rem)] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            <!-- Admin header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900 text-white flex-shrink-0">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl">⚙️</span>
+                    <h3 class="font-heading font-bold text-lg">Admin panel</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="admin-btn-export" onclick="exportConfig()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition">📤 Export</button>
+                    <button id="admin-btn-import" onclick="document.getElementById('admin-import-file').click()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition">📥 Import</button>
+                    <button id="admin-btn-reset" onclick="resetConfig()" class="text-sm px-3 py-1.5 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 transition">♻️ Reset</button>
+                    <button onclick="closeAdmin()" class="text-sm px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 transition">✕</button>
+                </div>
+            </div>
+
+            <!-- Admin main -->
+            <div id="admin-main" class="flex-1 flex overflow-hidden">
+                <aside class="w-60 flex-shrink-0 border-r border-gray-100 bg-gray-50 overflow-y-auto p-3">
+                    <div id="admin-tabs" class="space-y-1"></div>
+                </aside>
+                <div class="flex-1 overflow-y-auto">
+                    <div id="admin-form" class="p-8 max-w-3xl"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="admin-import-file" accept=".json,application/json" class="hidden" onchange="importConfig(event)">
+
+    <script>
+        // ============================================================
+        //  ADMIN PANEL — owner-only customization (Ctrl+Shift+A)
+        // ============================================================
+        const ADMIN_STORAGE = {
+            config: 'kb_admin_config_v1'
+        };
+
+        // ------- Default content (mirrors the HTML) -------
+        const DEFAULT_CONFIG = {
+            brand: { name: 'KlipBox', accent: '#2563eb' },
+            hero: {
+                badge: 'Nový! Propagujte @xetor.sk a vydělávejte — 5 Kč / 1 000 zhlédnutí',
+                title1: 'Propagujte',
+                title2: 'Vydělávejte peníze.',
+                subtitle: 'Sdílejte příspěvky @xetor.sk na svém TikToku, Instagramu nebo YouTubu a získejte 5 Kč za každých 1 000 zhlédnutí. Stačí sledovat účet a sdílet obsah.',
+                cta1: 'Zapojit se a vydělávat →',
+                cta2: 'Sledovat na Instagramu',
+                perks: ['Vstup zdarma', '5 Kč / 1 000 zhlédnutí', 'Týdenní výplaty']
+            },
+            howItWorks: {
+                visible: true,
+                eyebrow: 'Jak na to',
+                heading: 'Jak propagovat a vydělávat',
+                sub: 'Tři jednoduché kroky k prvním výdělkům',
+                steps: [
+                    { title: 'Sledujte @xetor.sk', text: 'Nejdřív účet sledujte na Instagramu — to je základ celé propagace a vašeho výdělku.' },
+                    { title: 'Sdílejte obsah', text: 'Stáhněte si příspěvky @xetor.sk a publikujte je na svém TikToku, Instagram Reels nebo YouTube Shorts.' },
+                    { title: 'Získejte zaplaceno', text: 'Za každých 1 000 zhlédnutí získáte 5 Kč. Výplaty posíláme týdně na účet nebo přes PayPal.' }
+                ]
+            },
+            instagram: {
+                visible: true,
+                eyebrow: 'Instagram',
+                heading: 'Sledujte @xetor.sk',
+                followersBadge: '745+ sledujících',
+                name: 'xetor.sk',
+                handle: '@xetor.sk · Instagram',
+                followers: '745+',
+                followersLabel: 'Sledujících',
+                following: '64',
+                followingLabel: 'Sledovaných',
+                profilePic: 'profile.jpg',
+                followBtn: 'Sledovat',
+                followUrl: 'https://www.instagram.com/xetor.sk/',
+                text1: 'Jmenuji se xetor.sk a na Instagramu sdílím svůj život přesně takový, jaký je — autenticky, bez zbytečné pózy a s nadhledem. Můj profil je místem, kde se potkává každodenní realita s lehkou zábavou, a právě to dělá z každého příspěvku něco, na co se vyplatí počkat.',
+                text2: 'Sledování mě nic nestojí — stačí jedno kliknutí a budete u všeho, co mě baví. Aktivně reaguji na zprávy i komentáře, takže nejste jen divák, ale součást komunity, která roste každým dnem. Dej follow bro!',
+                cta: 'Sledovat @xetor.sk →',
+                benefits: [
+                    { title: 'Autenticita', text: 'Obsah, který je skutečný — ne uměle vykonstruovaný.' },
+                    { title: 'Pravidelnost', text: 'Nový obsah, na který se můžete těšit.' },
+                    { title: 'Komunita', text: 'Odpovídám na zprávy a komentáře.' },
+                    { title: 'Zábava', text: 'Momentky, u kterých se zastavíte.' }
+                ]
+            },
+            features: {
+                visible: true,
+                eyebrow: 'Proč propagovat',
+                heading: 'Proč propagovat @xetor.sk',
+                items: [
+                    { title: 'Týdenní výplaty', text: 'Žádné čekání. Výdělky posíláme každý týden převodem na účet nebo přes PayPal, bez minimálního limitu.' },
+                    { title: '5 Kč za 1 000 zhlédnutí', text: 'Žádné skryté poplatky. Předem vidíte, kolik za každých 1 000 zhlédnutí dostanete.' },
+                    { title: 'Bez sledujících', text: 'Nepotřebujete vlastní publikum ani tisíce followerů. Stačí sdílet obsah @xetor.sk.' }
+                ]
+            },
+            cta: {
+                visible: true,
+                title: 'Propagujte @xetor.sk a vydělávejte.',
+                text: 'Sledujte účet, sdílejte příspěvky na svém TikToku, Instagramu nebo YouTubu a získejte 5 Kč za každých 1 000 zhlédnutí. Nepotřebujete sledující.',
+                button: 'Zapojit se zdarma →'
+            },
+            footer: {
+                visible: true,
+                description: 'Sledujte @xetor.sk na Instagramu a vydělávejte propagací jeho obsahu — 5 Kč za každých 1 000 zhlédnutí.',
+                legalLinks: [
+                    { label: 'Podmínky služby', href: '#' },
+                    { label: 'Zásady ochrany soukromí', href: '#' },
+                    { label: 'Zásady cookies', href: '#' }
+                ],
+                instagramLabel: 'Instagram — @xetor.sk',
+                email: 'ahoj@klipbox.cz',
+                copyright: '© 2026 KlipBox. Všechna práva vyhrazena.',
+                bottomText: 'Propagujte @xetor.sk — 5 Kč / 1 000 zhlédnutí'
+            }
+        };
+
+        // ------- Config helpers -------
+        function getPath(obj, path) {
+            return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+        }
+        function setPath(obj, path, value) {
+            const keys = path.split('.');
+            let o = obj;
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!o[keys[i]] || typeof o[keys[i]] !== 'object') o[keys[i]] = {};
+                o = o[keys[i]];
+            }
+            o[keys[keys.length - 1]] = value;
+        }
+        function loadConfig() {
+            try {
+                const raw = localStorage.getItem(ADMIN_STORAGE.config);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        }
+        function saveConfigToStorage(cfg) {
+            localStorage.setItem(ADMIN_STORAGE.config, JSON.stringify(cfg));
+        }
+
+        // ------- Apply config to the page -------
+        function shadeColor(hex, percent) {
+            const num = parseInt(hex.replace('#', ''), 16);
+            let r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+            const t = percent < 0 ? 0 : 255;
+            const p = Math.abs(percent) / 100;
+            r = Math.round((t - r) * p) + r;
+            g = Math.round((t - g) * p) + g;
+            b = Math.round((t - b) * p) + b;
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function applyConfig(cfg) {
+            const applyValue = (path, value) => {
+                if (value === undefined || value === null || value === '') return;
+                document.querySelectorAll(`[data-field="${path}"]`).forEach(el => {
+                    if (el.dataset.attr === 'href') el.setAttribute('href', value);
+                    else if (el.dataset.attr === 'mailto') el.setAttribute('href', 'mailto:' + value);
+                    else if (el.dataset.attr === 'src') el.setAttribute('src', value);
+                    else el.textContent = value;
+                });
+            };
+            // brand
+            applyValue('brand.name', cfg.brand.name);
+            document.documentElement.style.setProperty('--accent', cfg.brand.accent || '#2563eb');
+            document.documentElement.style.setProperty('--accent-dark', shadeColor(cfg.brand.accent || '#2563eb', -12));
+            // hero
+            ['badge','title1','title2','subtitle','cta1','cta2'].forEach(k => applyValue('hero.' + k, cfg.hero[k]));
+            (cfg.hero.perks || []).forEach((p, i) => applyValue('hero.perks.' + i, (p && typeof p === 'object') ? p.text : p));
+            // how it works
+            (cfg.howItWorks && cfg.howItWorks.visible) ? document.getElementById('fungovani').style.display = '' : document.getElementById('fungovani').style.display = 'none';
+            ['eyebrow','heading','sub'].forEach(k => applyValue('howItWorks.' + k, cfg.howItWorks[k]));
+            (cfg.howItWorks.steps || []).forEach((s, i) => {
+                applyValue('howItWorks.steps.' + i + '.title', s.title);
+                applyValue('howItWorks.steps.' + i + '.text', s.text);
+            });
+            // instagram
+            (cfg.instagram && cfg.instagram.visible) ? document.getElementById('instagram').style.display = '' : document.getElementById('instagram').style.display = 'none';
+            ['eyebrow','heading','followersBadge','name','handle','followers','followersLabel','following','followingLabel','profilePic','followBtn','followUrl','text1','text2','cta'].forEach(k => applyValue('instagram.' + k, cfg.instagram[k]));
+            (cfg.instagram.benefits || []).forEach((b, i) => {
+                applyValue('instagram.benefits.' + i + '.title', b.title);
+                applyValue('instagram.benefits.' + i + '.text', b.text);
+            });
+            // features
+            const featuresSection = document.querySelector('[data-section="features"]');
+            featuresSection.style.display = (!cfg.features || cfg.features.visible !== false) ? '' : 'none';
+            ['eyebrow','heading'].forEach(k => applyValue('features.' + k, cfg.features[k]));
+            (cfg.features.items || []).forEach((f, i) => {
+                applyValue('features.items.' + i + '.title', f.title);
+                applyValue('features.items.' + i + '.text', f.text);
+            });
+            // closing CTA
+            const ctaSection = document.querySelector('[data-section="cta"]');
+            ctaSection.style.display = (cfg.cta && cfg.cta.visible) ? '' : 'none';
+            ['title','text','button'].forEach(k => applyValue('cta.' + k, cfg.cta[k]));
+            // footer
+            const footerEl = document.querySelector('[data-section="footer"]');
+            footerEl.style.display = (cfg.footer && cfg.footer.visible) ? '' : 'none';
+            applyValue('footer.description', cfg.footer.description);
+            applyValue('footer.instagramLabel', cfg.footer.instagramLabel);
+            applyValue('footer.email', cfg.footer.email);
+            applyValue('footer.copyright', cfg.footer.copyright);
+            applyValue('footer.bottomText', cfg.footer.bottomText);
+            (cfg.footer.legalLinks || []).forEach((l, i) => {
+                applyValue('footer.legalLinks.' + i + '.href', l.href);
+                applyValue('footer.legalLinks.' + i + '.label', l.label);
+            });
+        }
+
+        // ------- Admin form schema -------
+        const ADMIN_GROUPS = [
+            { id: 'brand', label: '🎨 Značka a barvy', fields: [
+                { path: 'brand.name', label: 'Název značky', type: 'text' },
+                { path: 'brand.accent', label: 'Akcentní barva', type: 'color' }
+            ]},
+            { id: 'hero', label: '🏠 Hlavička', fields: [
+                { path: 'hero.badge', label: 'Badge nahoře', type: 'text' },
+                { path: 'hero.title1', label: 'Titulek — řádek 1', type: 'text' },
+                { path: 'hero.title2', label: 'Titulek — řádek 2', type: 'text' },
+                { path: 'hero.subtitle', label: 'Podtitulek', type: 'textarea' },
+                { path: 'hero.cta1', label: 'Tlačítko 1 (registrace)', type: 'text' },
+                { path: 'hero.cta2', label: 'Tlačítko 2 (Instagram)', type: 'text' },
+                { path: 'hero.perks', label: 'Výhody pod tlačítky', type: 'list', sub: [
+                    { path: 'text', label: 'Text', type: 'text' }
+                ]}
+            ]},
+            { id: 'howItWorks', label: '⚙️ Jak to funguje', toggle: { path: 'howItWorks.visible' }, fields: [
+                { path: 'howItWorks.eyebrow', label: 'Malý nadpis', type: 'text' },
+                { path: 'howItWorks.heading', label: 'Nadpis', type: 'text' },
+                { path: 'howItWorks.sub', label: 'Podnadpis', type: 'text' },
+                { path: 'howItWorks.steps', label: 'Kroky', type: 'list', sub: [
+                    { path: 'title', label: 'Nadpis kroku', type: 'text' },
+                    { path: 'text', label: 'Text kroku', type: 'textarea' }
+                ]}
+            ]},
+            { id: 'instagram', label: '📸 Instagram', toggle: { path: 'instagram.visible' }, fields: [
+                { path: 'instagram.eyebrow', label: 'Malý nadpis', type: 'text' },
+                { path: 'instagram.heading', label: 'Nadpis sekce', type: 'text' },
+                { path: 'instagram.followersBadge', label: 'Odznak (počet sledujících)', type: 'text' },
+                { path: 'instagram.name', label: 'Jméno profilu', type: 'text' },
+                { path: 'instagram.handle', label: 'Handle', type: 'text' },
+                { path: 'instagram.followers', label: 'Počet sledujících', type: 'text' },
+                { path: 'instagram.followersLabel', label: 'Popisek sledujících', type: 'text' },
+                { path: 'instagram.following', label: 'Počet sledovaných', type: 'text' },
+                { path: 'instagram.followingLabel', label: 'Popisek sledovaných', type: 'text' },
+                { path: 'instagram.profilePic', label: 'Profilová fotka (URL)', type: 'text' },
+                { path: 'instagram.followBtn', label: 'Text tlačítka', type: 'text' },
+                { path: 'instagram.followUrl', label: 'Odkaz na Instagram', type: 'text' },
+                { path: 'instagram.text1', label: 'Text — odstavec 1', type: 'textarea' },
+                { path: 'instagram.text2', label: 'Text — odstavec 2', type: 'textarea' },
+                { path: 'instagram.cta', label: 'Tlačítko dole', type: 'text' },
+                { path: 'instagram.benefits', label: 'Výhody', type: 'list', sub: [
+                    { path: 'title', label: 'Nadpis', type: 'text' },
+                    { path: 'text', label: 'Text', type: 'text' }
+                ]}
+            ]},
+            { id: 'features', label: '✨ Proč KlipBox', toggle: { path: 'features.visible' }, fields: [
+                { path: 'features.eyebrow', label: 'Malý nadpis', type: 'text' },
+                { path: 'features.heading', label: 'Nadpis', type: 'text' },
+                { path: 'features.items', label: 'Výhody', type: 'list', sub: [
+                    { path: 'title', label: 'Nadpis', type: 'text' },
+                    { path: 'text', label: 'Text', type: 'textarea' }
+                ]}
+            ]},
+            { id: 'cta', label: '🚀 Závěrečná výzva', toggle: { path: 'cta.visible' }, fields: [
+                { path: 'cta.title', label: 'Titulek', type: 'text' },
+                { path: 'cta.text', label: 'Text', type: 'textarea' },
+                { path: 'cta.button', label: 'Tlačítko', type: 'text' }
+            ]},
+            { id: 'footer', label: '🦶 Patička', toggle: { path: 'footer.visible' }, fields: [
+                { path: 'footer.description', label: 'Popis', type: 'textarea' },
+                { path: 'footer.legalLinks', label: 'Právní odkazy', type: 'list', sub: [
+                    { path: 'label', label: 'Text', type: 'text' },
+                    { path: 'href', label: 'Odkaz', type: 'text' }
+                ]},
+                { path: 'footer.instagramLabel', label: 'Text Instagram odkazu', type: 'text' },
+                { path: 'footer.email', label: 'Kontaktní e-mail', type: 'text' },
+                { path: 'footer.copyright', label: 'Copyright', type: 'text' },
+                { path: 'footer.bottomText', label: 'Spodní řádek', type: 'text' }
+            ]}
+        ];
+
+        let activeAdminTab = 'brand';
+        let adminConfig = null;
+
+        // ------- Admin open / close -------
+        function openAdmin() {
+            document.getElementById('admin-overlay').classList.remove('hidden');
+            showAdminMain();
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-overlay').classList.add('hidden');
+        }
+
+        function showAdminMain() {
+            adminConfig = loadConfig();
+            document.getElementById('admin-main').classList.remove('hidden');
+            buildAdminTabs();
+            renderAdminTab(activeAdminTab);
+        }
+
+        // ------- Admin form builder -------
+        function buildAdminTabs() {
+            const tabs = document.getElementById('admin-tabs');
+            tabs.innerHTML = '';
+            ADMIN_GROUPS.forEach(g => {
+                const btn = document.createElement('button');
+                btn.className = 'admin-tab w-full text-left px-3 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 mb-0.5';
+                if (g.id === activeAdminTab) btn.classList.add('active');
+                btn.textContent = g.label;
+                btn.onclick = () => { collectAdminForm(); rebuildLists(); activeAdminTab = g.id; buildAdminTabs(); renderAdminTab(g.id); };
+                tabs.appendChild(btn);
+            });
+        }
+
+        function fieldInputHtml(field, value) {
+            const id = 'adm-' + field.path.replace(/\./g, '-');
+            const label = `<label for="${id}" class="admin-label">${field.label}</label>`;
+            if (field.type === 'textarea') {
+                return `<div class="mb-4">${label}<textarea id="${id}" data-path="${field.path}" rows="3" class="admin-input">${value || ''}</textarea></div>`;
+            }
+            if (field.type === 'color') {
+                return `<div class="mb-4">${label}<input type="color" id="${id}" data-path="${field.path}" value="${value || '#2563eb'}" class="w-14 h-10 rounded-lg border border-gray-200 cursor-pointer bg-white p-1"></div>`;
+            }
+            return `<div class="mb-4">${label}<input type="text" id="${id}" data-path="${field.path}" value="${(value || '').replace(/"/g, '&quot;')}" class="admin-input"></div>`;
+        }
+
+        function renderAdminTab(groupId) {
+            const group = ADMIN_GROUPS.find(g => g.id === groupId);
+            const container = document.getElementById('admin-form');
+            container.innerHTML = '';
+
+            if (group.toggle) {
+                const visible = getPath(adminConfig, group.toggle.path);
+                const wrap = document.createElement('div');
+                wrap.className = 'mb-6 p-4 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-between';
+                wrap.innerHTML = `<span class="text-sm font-semibold text-gray-700">Zobrazit tuto sekci na webu</span>
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" data-path="${group.toggle.path}" ${visible ? 'checked' : ''} class="w-5 h-5 accent-text">
+                    </label>`;
+                container.appendChild(wrap);
+            }
+
+            group.fields.forEach(field => {
+                if (field.type === 'list') {
+                    const items = getPath(adminConfig, field.path) || [];
+                    const listWrap = document.createElement('div');
+                    listWrap.className = 'mb-5';
+                    listWrap.innerHTML = `<div class="admin-label">${field.label}</div>`;
+                    const itemsWrap = document.createElement('div');
+                    itemsWrap.id = 'admin-list-' + field.path.replace(/\./g, '-');
+                    itemsWrap.className = 'space-y-3';
+                    items.forEach((item, i) => {
+                        itemsWrap.appendChild(renderListItem(field, i, item));
+                    });
+                    listWrap.appendChild(itemsWrap);
+                    const addBtn = document.createElement('button');
+                    addBtn.className = 'mt-3 text-sm font-semibold accent-text hover:underline';
+                    addBtn.textContent = '+ Přidat';
+                    addBtn.onclick = () => addListItem(field);
+                    listWrap.appendChild(addBtn);
+                    container.appendChild(listWrap);
+                } else {
+                    container.insertAdjacentHTML('beforeend', fieldInputHtml(field, getPath(adminConfig, field.path)));
+                }
+            });
+
+            const saveBar = document.createElement('div');
+            saveBar.className = 'mt-8 pt-6 border-t border-gray-100 flex items-center justify-between gap-4';
+            saveBar.innerHTML = `<p class="text-xs text-gray-400">Změny se uloží do prohlížeče a projeví se hned po uložení.</p>
+                <button onclick="saveAdminConfig()" class="flex-shrink-0 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-lg shadow-indigo-500/25">💾 Uložit změny</button>`;
+            container.appendChild(saveBar);
+        }
+
+
+
+        function renderListItem(field, index, item) {
+            const row = document.createElement('div');
+            row.className = 'admin-list-row';
+            row.dataset.index = index;
+            const header = document.createElement('div');
+            header.className = 'flex items-center justify-between mb-2';
+            header.innerHTML = `<span class="text-xs font-semibold text-gray-400">Položka ${index + 1}</span>`;
+            const del = document.createElement('button');
+            del.className = 'text-xs text-red-500 hover:underline';
+            del.textContent = '✕ Odebrat';
+            del.onclick = () => removeListItem(field, row);
+            header.appendChild(del);
+            row.appendChild(header);
+            field.sub.forEach(subField => {
+                const sub = Object.assign({}, subField);
+                sub.path = field.path + '.' + index + '.' + subField.path;
+                const value = (item && typeof item === 'object')
+                    ? (item[subField.path] || '')
+                    : (subField.path === 'text' ? item || '' : '');
+                row.insertAdjacentHTML('beforeend', fieldInputHtml(sub, value));
+            });
+            return row;
+        }
+
+        function addListItem(field) {
+            const container = document.getElementById('admin-list-' + field.path.replace(/\./g, '-'));
+            const items = getPath(adminConfig, field.path) || [];
+            const newItem = {};
+            field.sub.forEach(s => newItem[s.path] = '');
+            items.push(newItem);
+            container.appendChild(renderListItem(field, items.length - 1, newItem));
+        }
+
+        function removeListItem(field, row) {
+            const container = document.getElementById('admin-list-' + field.path.replace(/\./g, '-'));
+            const index = parseInt(row.dataset.index, 10);
+            const items = getPath(adminConfig, field.path) || [];
+            items.splice(index, 1);
+            row.remove();
+            // renumber remaining rows (skip the + Přidat button)
+            const rows = container.querySelectorAll('.admin-list-row');
+            rows.forEach((child, i) => {
+                child.dataset.index = i;
+                child.querySelectorAll('[data-path]').forEach(inp => {
+                    const suffix = inp.dataset.path.split('.').slice(field.path.split('.').length).join('.');
+                    inp.dataset.path = field.path + '.' + i + '.' + suffix;
+                });
+            });
+        }
+
+        // ------- Save / export / import / reset -------
+        function collectAdminForm() {
+            // read visible form inputs into adminConfig (keeps edits across tab switches)
+            document.querySelectorAll('#admin-form [data-path]').forEach(inp => {
+                const path = inp.dataset.path;
+                const value = inp.type === 'checkbox' ? inp.checked : inp.value;
+                setPath(adminConfig, path, value);
+            });
+        }
+
+        function rebuildLists() {
+            // rebuild list arrays from DOM rows (only for lists currently rendered)
+            ADMIN_GROUPS.forEach(g => (g.fields || []).forEach(f => {
+                if (f.type === 'list') {
+                    const container = document.getElementById('admin-list-' + f.path.replace(/\./g, '-'));
+                    if (!container) return; // tab not open — keep the current value
+                    const rows = container.querySelectorAll('.admin-list-row');
+                    const arr = [];
+                    rows.forEach(row => {
+                        const item = {};
+                        row.querySelectorAll('[data-path]').forEach(inp => {
+                            const suffix = inp.dataset.path.replace(f.path + '.', '');
+                            const key = suffix.split('.')[1];
+                            item[key] = inp.type === 'checkbox' ? inp.checked : inp.value;
+                        });
+                        arr.push(item);
+                    });
+                    setPath(adminConfig, f.path, arr);
+                }
+            }));
+        }
+
+        function saveAdminConfig() {
+            collectAdminForm();
+            rebuildLists();
+            saveConfigToStorage(adminConfig);
+            applyConfig(adminConfig);
+            showToast('Změny uloženy a použity na webu ✓');
+        }
+
+        function exportConfig() {
+            const cfg = loadConfig();
+            const blob = new Blob([JSON.stringify(cfg, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'klipbox-config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Konfigurace exportována ✓');
+        }
+
+        function importConfig(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    // shallow validation + deep merge so missing keys fall back to defaults
+                    if (!parsed || typeof parsed !== 'object' || !parsed.brand) throw new Error('Neplatný soubor');
+                    const merged = Object.assign({}, JSON.parse(JSON.stringify(DEFAULT_CONFIG)), parsed);
+                    saveConfigToStorage(merged);
+                    adminConfig = merged;
+                    applyConfig(merged);
+                    renderAdminTab(activeAdminTab);
+                    showToast('Konfigurace importována ✓');
+                } catch (err) {
+                    showToast('Import selhal — neplatný soubor');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function resetConfig() {
+            if (!confirm('Opravdu chcete obnovit výchozí obsah webu? Vaše úpravy budou smazány.')) return;
+            const defaults = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            saveConfigToStorage(defaults);
+            adminConfig = defaults;
+            applyConfig(defaults);
+            renderAdminTab(activeAdminTab);
+            showToast('Výchozí obsah obnoven ✓');
+        }
+
+        // ------- Init -------
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+                e.preventDefault();
+                openAdmin();
+            }
+        });
+
+        // apply saved config on load
+        (function initAdmin() {
+            const saved = loadConfig();
+            applyConfig(saved);
+        })();
+
+        // ============================================================
+        //  SITE LOGIC (modals, nav, smooth scroll)
+        // ============================================================
+        function openModal(type) {
+            document.getElementById(type + '-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModals() {
+            document.getElementById('signup-modal').classList.add('hidden');
+            document.getElementById('login-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        function switchToLogin() {
+            closeModals();
+            openModal('login');
+        }
+        
+        function switchToSignup() {
+            closeModals();
+            openModal('signup');
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('success-toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.remove('hidden');
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => toast.classList.add('hidden'), 3500);
+        }
+        
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            
+            if (!name || !email || password.length < 6) {
+                showToast('Vyplňte prosím všechna pole správně.');
+                return;
+            }
+            
+            localStorage.setItem('klipbox_user', JSON.stringify({
+                name: name,
+                email: email,
+                platform: document.getElementById('signup-platform').value,
+                joinDate: new Date().toISOString()
+            }));
+            
+            closeModals();
+            showToast('Vítejte ' + name + '! Účet byl úspěšně vytvořen.');
+            
+            // Update UI to show logged in state
+            updateNavForLoggedIn(name);
+        }
+        
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showToast('Vyplňte prosím e-mail a heslo.');
+                return;
+            }
+            
+            // Demo login - check if user exists in localStorage
+            const existing = JSON.parse(localStorage.getItem('klipbox_user') || 'null');
+            if (existing && existing.email === email) {
+                closeModals();
+                showToast('Vítejte zpět, ' + existing.name + '!');
+                updateNavForLoggedIn(existing.name);
+            } else {
+                // Demo: create new user for any email
+                const name = email.split('@')[0];
+                localStorage.setItem('klipbox_user', JSON.stringify({
+                    name: name,
+                    email: email,
+                    platform: 'tiktok',
+                    joinDate: new Date().toISOString()
+                }));
+                closeModals();
+                showToast('Vítejte, ' + name + '!');
+                updateNavForLoggedIn(name);
+            }
+        }
+        
+        function updateNavForLoggedIn(name) {
+            const nav = document.querySelector('nav .flex.items-center.gap-3');
+            nav.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 accent-grad rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        ${name.charAt(0).toUpperCase()}
+                    </div>
+                    <span class="font-semibold text-gray-700 hidden sm:block">${name}</span>
+                </div>
+            `;
+        }
+        
+        // Navbar hide/show on scroll
+        let lastScrollY = 0;
+        const nav = document.getElementById("main-nav");
+        window.addEventListener("scroll", () => {
+            const currentScrollY = window.scrollY;
+            if (currentScrollY > 100) {
+                if (currentScrollY > lastScrollY) {
+                    nav.classList.add("nav-hidden");
+                    nav.classList.remove("nav-visible");
+                } else {
+                    nav.classList.remove("nav-hidden");
+                    nav.classList.add("nav-visible");
+                }
+            } else {
+                nav.classList.remove("nav-hidden");
+                nav.classList.add("nav-visible");
+            }
+            lastScrollY = currentScrollY;
+        });
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card-lift, .stagger-children').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href === '#') return; // plain placeholder link
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // ESC key closes modals and admin
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModals();
+                closeAdmin();
+            }
+        });
+    </script>
+</body>
+</html>
