@@ -1,0 +1,2 @@
+# Klipuj.cz
+Klipyczsk
